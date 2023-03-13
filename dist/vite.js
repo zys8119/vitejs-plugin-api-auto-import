@@ -17501,7 +17501,8 @@ const ${name} = ${nameHash}`,
     }
   }).filter((e) => e.import && e.data);
   const templateData = {
-    importData: importData.map(({ name, path }) => `import ${name} from "${resolveAliasName}/${path}"`).join("\n"),
+    importData: importData.map(({ name, path }) => `// @ts-ignore
+import ${name} from "${resolveAliasName}/${path}"`).join("\n"),
     data: JSON.stringify(treeData, null, 4).replace(/"|'/img, ""),
     exportData: importData.map(({ name }) => name).join(",\n	"),
     constApiData: config.constApiData,
