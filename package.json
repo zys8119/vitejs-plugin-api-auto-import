@@ -1,6 +1,6 @@
 {
     "name": "vitejs-plugin-api-auto-import",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "description": "",
     "main": "dist/vite.js",
     "scripts": {

@@ -105,6 +105,7 @@ export function autoApi (options?:Partial<AutoApi>):Plugin{
         ],
         resolvers:[]
     } as AutoApi, options)
+    const outFileName = config.outFile.replace(/\.ts$/,'')
     const reg = new RegExp(config.name.replace(/(\$)/g,'\\$1'))
     const resolveAliasName = `@viteApiAutoRoot_${(Date.now()+Math.random()).toString(16)}`
     const apiDirPath = resolve(process.cwd(), config.dir)
@@ -135,7 +136,7 @@ export function autoApi (options?:Partial<AutoApi>):Plugin{
         },
         transform(code,id){
             if(code.match(reg) && config.include.find(reg=>reg.test(id))){
-                return `import ${config.name} from "${resolveAliasName}/index"\n${code}`
+                return `import ${config.name} from "${resolveAliasName}/${outFileName}"\n${code}`
             }
         }
     }
