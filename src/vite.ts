@@ -42,7 +42,7 @@ function pathToTree(paths:string[]) {
     });
     return tree;
 }
-function transformFile(config:AutoApi, apiDirPath:string, mainFilePath:string){
+function transformFile(config:AutoApi, apiDirPath:string, mainFilePath:string, resolveAliasName:string){
     if(!existsSync(apiDirPath)) mkdirSync(apiDirPath)
     const resolvers = config.resolvers
     const files:string[] = sync(`${resolve(apiDirPath, '**/*.ts')}`)
@@ -77,7 +77,7 @@ function transformFile(config:AutoApi, apiDirPath:string, mainFilePath:string){
         }
     }).filter(e=>e.import && e.data)
     const templateData = {
-        importData:importData.map(({name, path})=>`import ${name} from "./${path}"`).join("\n"),
+        importData:importData.map(({name, path})=>`import ${name} from "${resolveAliasName}/${path}"`).join("\n"),
         data:JSON.stringify(treeData, null, 4).replace(/"|'/img,''),
         exportData:importData.map(({name})=>name).join(",\n\t"),
         constApiData:config.constApiData,
@@ -110,7 +110,7 @@ export function autoApi (options?:Partial<AutoApi>):Plugin{
     const resolveAliasName = `@viteApiAutoRoot_${(Date.now()+Math.random()).toString(16)}`
     const apiDirPath = resolve(process.cwd(), config.dir)
     const mainFilePath = resolve(apiDirPath,'index.ts')
-    transformFile(config, apiDirPath, mainFilePath)
+    transformFile(config, apiDirPath, mainFilePath, resolveAliasName)
     return {
         enforce:'post',
         name:'vitejs-plugin-api-auto-import',
@@ -119,7 +119,7 @@ export function autoApi (options?:Partial<AutoApi>):Plugin{
             handler(serve){
                 serve.watcher.on('all', (type, path)=>{
                     if(path !== mainFilePath && path.includes(apiDirPath)){
-                        transformFile(config, apiDirPath, mainFilePath)
+                        transformFile(config, apiDirPath, mainFilePath, resolveAliasName)
                     }
                 })
                 serve.watcher.add(apiDirPath)
