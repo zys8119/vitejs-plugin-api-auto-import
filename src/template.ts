@@ -1,3 +1,4 @@
+/*eslint-disable*/
 <%= importData %>
 export const <%= constApiData %> = <%= data %>
 export {
