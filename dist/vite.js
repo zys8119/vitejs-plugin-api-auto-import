@@ -17532,6 +17532,7 @@ function autoApi(options) {
     ],
     resolvers: []
   }, options);
+  const reg = new RegExp(config.name.replace(/(\$)/g, "\\$1"));
   const resolveAliasName = `@viteApiAutoRoot_${(Date.now() + Math.random()).toString(16)}`;
   const apiDirPath = (0, import_path.resolve)(process.cwd(), config.dir);
   const mainFilePath = (0, import_path.resolve)(apiDirPath, "index.ts");
@@ -17560,7 +17561,7 @@ function autoApi(options) {
       });
     },
     transform(code, id) {
-      if (config.include.find((reg) => reg.test(id))) {
+      if (code.match(reg) && config.include.find((reg2) => reg2.test(id))) {
         return `import ${config.name} from "${resolveAliasName}/index"
 ${code}`;
       }
