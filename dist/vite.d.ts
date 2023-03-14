@@ -9,6 +9,7 @@ export interface AutoApi {
     resolvers?: Resolver[];
     resolveAliasName?: string;
     autoResolveAliasName?: boolean;
+    exclude?: RegExp;
 }
 export interface Resolver {
     from: string;

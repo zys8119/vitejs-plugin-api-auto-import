@@ -33,6 +33,8 @@ export default defineConfig({
         //     resolveAliasName?:string
         //     是否动态导入别名
         //     autoResolveAliasName?:string
+        //     排除的文件
+        //     exclude?:string
         // })
         AutoApi({
             name:'$apis',

@@ -22,6 +22,8 @@ export interface AutoApi {
     resolveAliasName?:string
     // 是否动态导入别名
     autoResolveAliasName?:boolean
+    // 排除文件
+    exclude?:RegExp
 }
 
 export interface Resolver {
@@ -50,7 +52,7 @@ function transformFile(config:AutoApi, apiDirPath:string, mainFilePath:string, r
     if(!existsSync(apiDirPath)) mkdirSync(apiDirPath)
     const resolvers = config.resolvers
     const files:string[] = sync(`${resolve(apiDirPath, '**/*.ts')}`)
-        .filter(e=>!e.includes(mainFilePath))
+        .filter(e=>!e.includes(mainFilePath) && (Object.prototype.toString.call(config.exclude) === '[object RegExp]' ? !config.exclude.test(e) : true))
     const treeData = pathToTree(files.map(e=>e.replace(new RegExp(apiDirPath+'\/*'),'')))
     const importData = files.map(e=>{
         const path = e.replace(new RegExp(`${apiDirPath}\/*|\\.\\w+$`,'img'), '')
@@ -108,11 +110,11 @@ export function autoApi (options?:Partial<AutoApi>):Plugin{
             /\.md$/, // .md
         ],
         resolvers:[],
-        autoResolveAliasName:false
+        autoResolveAliasName:false,
     } as AutoApi, options)
     const outFileName = config.outFile.replace(/\.ts$/,'')
     const reg = new RegExp(config.name.replace(/(\$)/g,'\\$1'))
-    const resolveAliasName = config.resolveAliasName || config.autoResolveAliasName ? `@viteApiAutoRoot_${Date.now()+Math.round(Math.random()*10000000).toString(16)}` : '.'
+    const resolveAliasName = config.resolveAliasName || (config.autoResolveAliasName ? `@viteApiAutoRoot_${Date.now()+Math.round(Math.random()*10000000).toString(16)}` : '.')
     const apiDirPath = resolve(process.cwd(), config.dir)
     const mainFilePath = resolve(apiDirPath,'index.ts')
     transformFile(config, apiDirPath, mainFilePath, resolveAliasName)
