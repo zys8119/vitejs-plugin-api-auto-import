@@ -24,8 +24,10 @@ export interface AutoApi {
     autoResolveAliasName?:boolean
     // 排除文件
     exclude?:RegExp
-    // 排除文件
+    // 是否开启全部导出
     allExport?:boolean
+    // 需要导出的字段，优先级最高
+    import?:string | boolean
 }
 
 export interface Resolver {
@@ -89,8 +91,18 @@ function transformFile(config:AutoApi, apiDirPath:string, mainFilePath:string, r
             }
         }
     }).filter(e=>e.import && e.data)
+    const importField = (name:string)=> {
+        if(config.import === true){
+            return name
+        }else if(config.import === false){
+            return config.allExport ? `* as ${name}` : name
+        }else if(typeof config.import === 'string'){
+            return `{ ${config.import} as ${name}}`
+        }
+        return name
+    }
     const templateData = {
-        importData:importData.map(({name, path})=>`// @ts-ignore\nimport * as ${name} from "${resolveAliasName}/${path}"`).join("\n"),
+        importData:importData.map(({name, path})=>`// @ts-ignore\nimport ${importField(name)} from "${resolveAliasName}/${path}"`).join("\n"),
         data:JSON.stringify(treeData, null, 4).replace(/"|'/img,''),
         exportData:importData.map(({getApiName})=>getApiName).join("\n"),
         constApiData:config.constApiData,
@@ -119,6 +131,7 @@ export function autoApi (options?:Partial<AutoApi>):Plugin{
         resolvers:[],
         autoResolveAliasName:false,
         allExport:false,
+        import:true,
     } as AutoApi, options)
     const outFileName = config.outFile.replace(/\.ts$/,'')
     const reg = new RegExp(config.name.replace(/(\$)/g,'\\$1'))

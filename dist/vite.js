@@ -17505,9 +17505,19 @@ const ${name} = ${nameHash}`,
       };
     }
   }).filter((e) => e.import && e.data);
+  const importField = (name) => {
+    if (config.import === true) {
+      return name;
+    } else if (config.import === false) {
+      return config.allExport ? `* as ${name}` : name;
+    } else if (typeof config.import === "string") {
+      return `{ ${config.import} as ${name}}`;
+    }
+    return name;
+  };
   const templateData = {
     importData: importData.map(({ name, path }) => `// @ts-ignore
-import * as ${name} from "${resolveAliasName}/${path}"`).join("\n"),
+import ${importField(name)} from "${resolveAliasName}/${path}"`).join("\n"),
     data: JSON.stringify(treeData, null, 4).replace(/"|'/img, ""),
     exportData: importData.map(({ getApiName }) => getApiName).join("\n"),
     constApiData: config.constApiData,
@@ -17538,7 +17548,8 @@ function autoApi(options) {
     ],
     resolvers: [],
     autoResolveAliasName: false,
-    allExport: false
+    allExport: false,
+    import: true
   }, options);
   const outFileName = config.outFile.replace(/\.ts$/, "");
   const reg = new RegExp(config.name.replace(/(\$)/g, "\\$1"));

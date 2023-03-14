@@ -35,6 +35,10 @@ export default defineConfig({
         //     autoResolveAliasName?:string
         //     排除的文件
         //     exclude?:string
+        //     是否开启全部导出
+        //     allExport?:boolean
+        //     需要导出的字段，优先级最高
+        //     import?:string | boolean
         // })
         AutoApi({
             name:'$apis',

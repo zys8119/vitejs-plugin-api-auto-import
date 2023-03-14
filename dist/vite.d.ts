@@ -11,6 +11,7 @@ export interface AutoApi {
     autoResolveAliasName?: boolean;
     exclude?: RegExp;
     allExport?: boolean;
+    import?: string | boolean;
 }
 export interface Resolver {
     from: string;
