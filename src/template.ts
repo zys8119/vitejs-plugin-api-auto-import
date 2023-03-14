@@ -11,9 +11,7 @@ function getApi<T extends {default:any} | Record<any, any>, V = T extends { defa
 
 export const <%= constApiData %> = <%= data %>
 
-export {
-    <%= exportData %>
-}
+<%= exportData %>
 
 export default <%= constApiData %>
 
