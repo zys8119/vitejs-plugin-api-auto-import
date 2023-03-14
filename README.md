@@ -31,6 +31,8 @@ export default defineConfig({
         //     resolvers?:Resolver[]
         //     导入别名
         //     resolveAliasName?:string
+        //     是否动态导入别名
+        //     autoResolveAliasName?:string
         // })
         AutoApi({
             name:'$apis',

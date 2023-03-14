@@ -108,7 +108,7 @@ export function autoApi (options?:Partial<AutoApi>):Plugin{
             /\.md$/, // .md
         ],
         resolvers:[],
-        autoResolveAliasName:true
+        autoResolveAliasName:false
     } as AutoApi, options)
     const outFileName = config.outFile.replace(/\.ts$/,'')
     const reg = new RegExp(config.name.replace(/(\$)/g,'\\$1'))
