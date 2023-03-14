@@ -88,7 +88,7 @@ function transformFile(config:AutoApi, apiDirPath:string, mainFilePath:string, r
     const templateData = {
         importData:importData.map(({name, path})=>`// @ts-ignore\nimport * as ${name} from "${resolveAliasName}/${path}"`).join("\n"),
         data:JSON.stringify(treeData, null, 4).replace(/"|'/img,''),
-        exportData:importData.map(({getApiName})=>getApiName).join(",\n\t"),
+        exportData:importData.map(({getApiName})=>getApiName).join("\n"),
         constApiData:config.constApiData,
         apis:config.name,
     }

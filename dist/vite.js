@@ -17507,7 +17507,7 @@ const ${name} = ${nameHash}`,
     importData: importData.map(({ name, path }) => `// @ts-ignore
 import * as ${name} from "${resolveAliasName}/${path}"`).join("\n"),
     data: JSON.stringify(treeData, null, 4).replace(/"|'/img, ""),
-    exportData: importData.map(({ getApiName }) => getApiName).join(",\n	"),
+    exportData: importData.map(({ getApiName }) => getApiName).join("\n"),
     constApiData: config.constApiData,
     apis: config.name
   };
