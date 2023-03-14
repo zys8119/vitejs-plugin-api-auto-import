@@ -17535,7 +17535,7 @@ function autoApi(options) {
   }, options);
   const outFileName = config.outFile.replace(/\.ts$/, "");
   const reg = new RegExp(config.name.replace(/(\$)/g, "\\$1"));
-  const resolveAliasName = `@viteApiAutoRoot_${(Date.now() + Math.random()).toString(16)}`;
+  const resolveAliasName = config.resolveAliasName || `@viteApiAutoRoot_${Date.now() + Math.round(Math.random() * 1e7).toString(16)}`;
   const apiDirPath = (0, import_path.resolve)(process.cwd(), config.dir);
   const mainFilePath = (0, import_path.resolve)(apiDirPath, "index.ts");
   transformFile(config, apiDirPath, mainFilePath, resolveAliasName);

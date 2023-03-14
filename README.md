@@ -29,6 +29,8 @@ export default defineConfig({
         //     include:RegExp[]
         //     // 其他模块按需的导入
         //     resolvers?:Resolver[]
+        //     导入别名
+        //     resolveAliasName?:string
         // })
         AutoApi({
             name:'$apis',

@@ -18,6 +18,8 @@ export interface AutoApi {
     include:RegExp[]
     // 其他模块按需的导入
     resolvers?:Resolver[]
+    // 导入别名
+    resolveAliasName?:string
 }
 
 export interface Resolver {
@@ -107,7 +109,7 @@ export function autoApi (options?:Partial<AutoApi>):Plugin{
     } as AutoApi, options)
     const outFileName = config.outFile.replace(/\.ts$/,'')
     const reg = new RegExp(config.name.replace(/(\$)/g,'\\$1'))
-    const resolveAliasName = `@viteApiAutoRoot_${(Date.now()+Math.random()).toString(16)}`
+    const resolveAliasName = config.resolveAliasName || `@viteApiAutoRoot_${Date.now()+Math.round(Math.random()*10000000).toString(16)}`
     const apiDirPath = resolve(process.cwd(), config.dir)
     const mainFilePath = resolve(apiDirPath,'index.ts')
     transformFile(config, apiDirPath, mainFilePath, resolveAliasName)

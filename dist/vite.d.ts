@@ -7,6 +7,7 @@ export interface AutoApi {
     outFile: string;
     include: RegExp[];
     resolvers?: Resolver[];
+    resolveAliasName?: string;
 }
 export interface Resolver {
     from: string;
