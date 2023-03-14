@@ -41,7 +41,7 @@ function pathToTree(paths:string[]) {
             if (!node[part]) {
                 const isFile = (key+1) === parts.length
                 const fileName = isFile ? part.replace(/\..*/,'') : part
-                node[fileName] = isFile ? `${path.replace(/\..*/,'').split("/").join("_")}` : {};
+                node[fileName] = isFile ? `getApi(${path.replace(/\..*/, "").split("/").join("_")}_import)` : {};
             }
             node = node[part];
         });
@@ -56,10 +56,13 @@ function transformFile(config:AutoApi, apiDirPath:string, mainFilePath:string, r
     const treeData = pathToTree(files.map(e=>e.replace(new RegExp(apiDirPath+'\/*'),'')))
     const importData = files.map(e=>{
         const path = e.replace(new RegExp(`${apiDirPath}\/*|\\.\\w+$`,'img'), '')
+        const nameOrigin = path.split("/").join("_")
+        const name = `${nameOrigin}_import`
         return {
-            name:path.split("/").join("_"),
-            path,
-        }
+            name,
+            getApiName: `export const ${nameOrigin} = getApi(${name})`,
+            path
+        };
     })
 
     const resolversMap = resolvers.map((e, k) => {
@@ -83,9 +86,9 @@ function transformFile(config:AutoApi, apiDirPath:string, mainFilePath:string, r
         }
     }).filter(e=>e.import && e.data)
     const templateData = {
-        importData:importData.map(({name, path})=>`// @ts-ignore\nimport ${name} from "${resolveAliasName}/${path}"`).join("\n"),
+        importData:importData.map(({name, path})=>`// @ts-ignore\nimport * as ${name} from "${resolveAliasName}/${path}"`).join("\n"),
         data:JSON.stringify(treeData, null, 4).replace(/"|'/img,''),
-        exportData:importData.map(({name})=>name).join(",\n\t"),
+        exportData:importData.map(({getApiName})=>getApiName).join(",\n\t"),
         constApiData:config.constApiData,
         apis:config.name,
     }

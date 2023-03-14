@@ -17461,7 +17461,7 @@ function pathToTree(paths) {
       if (!node[part]) {
         const isFile = key + 1 === parts.length;
         const fileName = isFile ? part.replace(/\..*/, "") : part;
-        node[fileName] = isFile ? `${path.replace(/\..*/, "").split("/").join("_")}` : {};
+        node[fileName] = isFile ? `getApi(${path.replace(/\..*/, "").split("/").join("_")}_import)` : {};
       }
       node = node[part];
     });
@@ -17476,8 +17476,11 @@ function transformFile(config, apiDirPath, mainFilePath, resolveAliasName) {
   const treeData = pathToTree(files.map((e) => e.replace(new RegExp(apiDirPath + "/*"), "")));
   const importData = files.map((e) => {
     const path = e.replace(new RegExp(`${apiDirPath}/*|\\.\\w+$`, "img"), "");
+    const nameOrigin = path.split("/").join("_");
+    const name = `${nameOrigin}_import`;
     return {
-      name: path.split("/").join("_"),
+      name,
+      getApiName: `export const ${nameOrigin} = getApi(${name})`,
       path
     };
   });
@@ -17502,9 +17505,9 @@ const ${name} = ${nameHash}`,
   }).filter((e) => e.import && e.data);
   const templateData = {
     importData: importData.map(({ name, path }) => `// @ts-ignore
-import ${name} from "${resolveAliasName}/${path}"`).join("\n"),
+import * as ${name} from "${resolveAliasName}/${path}"`).join("\n"),
     data: JSON.stringify(treeData, null, 4).replace(/"|'/img, ""),
-    exportData: importData.map(({ name }) => name).join(",\n	"),
+    exportData: importData.map(({ getApiName }) => getApiName).join(",\n	"),
     constApiData: config.constApiData,
     apis: config.name
   };
