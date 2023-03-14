@@ -17531,11 +17531,12 @@ function autoApi(options) {
       /\.md$/
       // .md
     ],
-    resolvers: []
+    resolvers: [],
+    autoResolveAliasName: true
   }, options);
   const outFileName = config.outFile.replace(/\.ts$/, "");
   const reg = new RegExp(config.name.replace(/(\$)/g, "\\$1"));
-  const resolveAliasName = config.resolveAliasName || `@viteApiAutoRoot_${Date.now() + Math.round(Math.random() * 1e7).toString(16)}`;
+  const resolveAliasName = config.resolveAliasName || config.autoResolveAliasName ? `@viteApiAutoRoot_${Date.now() + Math.round(Math.random() * 1e7).toString(16)}` : ".";
   const apiDirPath = (0, import_path.resolve)(process.cwd(), config.dir);
   const mainFilePath = (0, import_path.resolve)(apiDirPath, "index.ts");
   transformFile(config, apiDirPath, mainFilePath, resolveAliasName);
@@ -17554,13 +17555,13 @@ function autoApi(options) {
       }
     },
     config(config2) {
-      return (0, import_lodash.merge)(config2, {
+      return /^@/.test(resolveAliasName) ? (0, import_lodash.merge)(config2, {
         resolve: {
           alias: {
             [resolveAliasName]: apiDirPath
           }
         }
-      });
+      }) : config2;
     },
     transform(code, id) {
       if (code.match(reg) && config.include.find((reg2) => reg2.test(id))) {

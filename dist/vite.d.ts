@@ -8,6 +8,7 @@ export interface AutoApi {
     include: RegExp[];
     resolvers?: Resolver[];
     resolveAliasName?: string;
+    autoResolveAliasName?: boolean;
 }
 export interface Resolver {
     from: string;

@@ -20,6 +20,8 @@ export interface AutoApi {
     resolvers?:Resolver[]
     // 导入别名
     resolveAliasName?:string
+    // 是否动态导入别名
+    autoResolveAliasName?:boolean
 }
 
 export interface Resolver {
@@ -105,11 +107,12 @@ export function autoApi (options?:Partial<AutoApi>):Plugin{
             /\.vue$/, /\.vue\?vue/, // .vue
             /\.md$/, // .md
         ],
-        resolvers:[]
+        resolvers:[],
+        autoResolveAliasName:true
     } as AutoApi, options)
     const outFileName = config.outFile.replace(/\.ts$/,'')
     const reg = new RegExp(config.name.replace(/(\$)/g,'\\$1'))
-    const resolveAliasName = config.resolveAliasName || `@viteApiAutoRoot_${Date.now()+Math.round(Math.random()*10000000).toString(16)}`
+    const resolveAliasName = config.resolveAliasName || config.autoResolveAliasName ? `@viteApiAutoRoot_${Date.now()+Math.round(Math.random()*10000000).toString(16)}` : '.'
     const apiDirPath = resolve(process.cwd(), config.dir)
     const mainFilePath = resolve(apiDirPath,'index.ts')
     transformFile(config, apiDirPath, mainFilePath, resolveAliasName)
@@ -128,13 +131,13 @@ export function autoApi (options?:Partial<AutoApi>):Plugin{
             }
         },
         config(config){
-            return merge(config, {
+            return /^@/.test(resolveAliasName) ? merge(config, {
                 resolve:{
                     alias:{
                         [resolveAliasName]:apiDirPath
                     }
                 }
-            })
+            }) : config
         },
         transform(code,id){
             if(code.match(reg) && config.include.find(reg=>reg.test(id))){
