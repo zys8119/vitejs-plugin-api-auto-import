@@ -10,6 +10,7 @@ export interface AutoApi {
     resolveAliasName?: string;
     autoResolveAliasName?: boolean;
     exclude?: RegExp;
+    allExport?: boolean;
 }
 export interface Resolver {
     from: string;

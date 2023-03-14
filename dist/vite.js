@@ -17452,7 +17452,7 @@ var import_fast_glob = __toESM(require_out4());
 var import_fs_extra = __toESM(require_lib());
 var import_path = require("path");
 var import_js_beautify = __toESM(require_js());
-function pathToTree(paths) {
+function pathToTree(paths, allExport) {
   const tree = {};
   paths.forEach((path) => {
     const parts = path.split("/");
@@ -17461,7 +17461,8 @@ function pathToTree(paths) {
       if (!node[part]) {
         const isFile = key + 1 === parts.length;
         const fileName = isFile ? part.replace(/\..*/, "") : part;
-        node[fileName] = isFile ? `getApi(${path.replace(/\..*/, "").split("/").join("_")}_import)` : {};
+        const name = `${path.replace(/\..*/, "").split("/").join("_")}_import`;
+        node[fileName] = isFile ? allExport ? `getApi(${name})` : name : {};
       }
       node = node[part];
     });
@@ -17473,14 +17474,15 @@ function transformFile(config, apiDirPath, mainFilePath, resolveAliasName) {
     (0, import_fs_extra.mkdirSync)(apiDirPath);
   const resolvers = config.resolvers;
   const files = (0, import_fast_glob.sync)(`${(0, import_path.resolve)(apiDirPath, "**/*.ts")}`).filter((e) => !e.includes(mainFilePath) && (Object.prototype.toString.call(config.exclude) === "[object RegExp]" ? !config.exclude.test(e) : true));
-  const treeData = pathToTree(files.map((e) => e.replace(new RegExp(apiDirPath + "/*"), "")));
+  const treeData = pathToTree(files.map((e) => e.replace(new RegExp(apiDirPath + "/*"), "")), config.allExport);
   const importData = files.map((e) => {
     const path = e.replace(new RegExp(`${apiDirPath}/*|\\.\\w+$`, "img"), "");
     const nameOrigin = path.split("/").join("_");
     const name = `${nameOrigin}_import`;
+    const getApiName = `export const ${nameOrigin} = ${config.allExport ? `getApi(${name})` : name}`;
     return {
       name,
-      getApiName: `export const ${nameOrigin} = getApi(${name})`,
+      getApiName,
       path
     };
   });
@@ -17535,7 +17537,8 @@ function autoApi(options) {
       // .md
     ],
     resolvers: [],
-    autoResolveAliasName: false
+    autoResolveAliasName: false,
+    allExport: false
   }, options);
   const outFileName = config.outFile.replace(/\.ts$/, "");
   const reg = new RegExp(config.name.replace(/(\$)/g, "\\$1"));

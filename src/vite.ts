@@ -24,6 +24,8 @@ export interface AutoApi {
     autoResolveAliasName?:boolean
     // 排除文件
     exclude?:RegExp
+    // 排除文件
+    allExport?:boolean
 }
 
 export interface Resolver {
@@ -32,7 +34,7 @@ export interface Resolver {
     // 按需导入函数
     resolve(importData:any):Record<any, any>
 }
-function pathToTree(paths:string[]) {
+function pathToTree(paths:string[], allExport:boolean) {
     const tree = {};
     paths.forEach(path => {
         const parts = path.split('/');
@@ -41,7 +43,8 @@ function pathToTree(paths:string[]) {
             if (!node[part]) {
                 const isFile = (key+1) === parts.length
                 const fileName = isFile ? part.replace(/\..*/,'') : part
-                node[fileName] = isFile ? `getApi(${path.replace(/\..*/, "").split("/").join("_")}_import)` : {};
+                const name = `${path.replace(/\..*/, "").split("/").join("_")}_import`
+                node[fileName] = isFile ? (allExport ? `getApi(${name})` : name) : {};
             }
             node = node[part];
         });
@@ -53,14 +56,15 @@ function transformFile(config:AutoApi, apiDirPath:string, mainFilePath:string, r
     const resolvers = config.resolvers
     const files:string[] = sync(`${resolve(apiDirPath, '**/*.ts')}`)
         .filter(e=>!e.includes(mainFilePath) && (Object.prototype.toString.call(config.exclude) === '[object RegExp]' ? !config.exclude.test(e) : true))
-    const treeData = pathToTree(files.map(e=>e.replace(new RegExp(apiDirPath+'\/*'),'')))
+    const treeData = pathToTree(files.map(e=>e.replace(new RegExp(apiDirPath+'\/*'),'')), config.allExport)
     const importData = files.map(e=>{
         const path = e.replace(new RegExp(`${apiDirPath}\/*|\\.\\w+$`,'img'), '')
         const nameOrigin = path.split("/").join("_")
         const name = `${nameOrigin}_import`
+        const getApiName = `export const ${nameOrigin} = ${config.allExport ? `getApi(${name})` : name}`
         return {
             name,
-            getApiName: `export const ${nameOrigin} = getApi(${name})`,
+            getApiName,
             path
         };
     })
@@ -114,6 +118,7 @@ export function autoApi (options?:Partial<AutoApi>):Plugin{
         ],
         resolvers:[],
         autoResolveAliasName:false,
+        allExport:false,
     } as AutoApi, options)
     const outFileName = config.outFile.replace(/\.ts$/,'')
     const reg = new RegExp(config.name.replace(/(\$)/g,'\\$1'))
