@@ -13,7 +13,7 @@ npm i vitejs-plugin-api-auto-import
 
 ```typescript
 import {defineConfig} from "vite"
-import AutoRoute from 'vitejs-plugin-vue-route-auto-import'
+import AutoApi from 'vitejs-plugin-api-auto-import'
 export default defineConfig({
     plugins:[
         // AutoRoute({

@@ -5,7 +5,7 @@ function getApi<T extends {default:any} | Record<any, any>, V = T extends { defa
     if (Object.keys(data).includes('default')) {
         return data.default
     }else {
-        return data as V
+        return data as unknown as V
     }
 }
 
