@@ -45,7 +45,7 @@ function toCamelCase(str) {
 function pathToTree(paths:string[], allExport:boolean) {
     const tree = {};
     paths.forEach(path => {
-        const parts = path.split('/');
+        const parts = path.split('/').map(e=>toCamelCase(e));
         let node = tree;
         parts.forEach((part,key) => {
             if (!node[part]) {
