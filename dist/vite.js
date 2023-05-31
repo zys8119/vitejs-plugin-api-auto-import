@@ -17452,6 +17452,11 @@ var import_fast_glob = __toESM(require_out4());
 var import_fs_extra = __toESM(require_lib());
 var import_path = require("path");
 var import_js_beautify = __toESM(require_js());
+function toCamelCase(str) {
+  return str.replace(/-([a-z])/g, function(match, letter) {
+    return letter.toUpperCase();
+  });
+}
 function pathToTree(paths, allExport) {
   const tree = {};
   paths.forEach((path) => {
@@ -17461,8 +17466,9 @@ function pathToTree(paths, allExport) {
       if (!node[part]) {
         const isFile = key + 1 === parts.length;
         const fileName = isFile ? part.replace(/\..*/, "") : part;
-        const name = `${path.replace(/\..*/, "").split("/").join("_")}_import`;
-        node[fileName] = isFile ? allExport ? `getApi(${name})` : name : {};
+        const nameOrigin = toCamelCase(path.replace(/\..*/, "").split("/").join("_"));
+        const name = `${nameOrigin}_import`;
+        node[toCamelCase(fileName)] = isFile ? allExport ? `getApi(${name})` : name : {};
       }
       node = node[part];
     });
@@ -17477,7 +17483,7 @@ function transformFile(config, apiDirPath, mainFilePath, resolveAliasName) {
   const treeData = pathToTree(files.map((e) => e.replace(new RegExp(apiDirPath + "/*"), "")), config.allExport);
   const importData = files.map((e) => {
     const path = e.replace(new RegExp(`${apiDirPath}/*|\\.\\w+$`, "img"), "");
-    const nameOrigin = path.split("/").join("_");
+    const nameOrigin = toCamelCase(path.split("/").join("_"));
     const name = `${nameOrigin}_import`;
     const getApiName = `export const ${nameOrigin} = ${config.allExport ? `getApi(${name})` : name}`;
     return {

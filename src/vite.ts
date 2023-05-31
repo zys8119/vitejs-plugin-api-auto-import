@@ -36,6 +36,12 @@ export interface Resolver {
     // 按需导入函数
     resolve(importData:any):Record<any, any>
 }
+function toCamelCase(str) {
+    return str.replace(/-([a-z])/g, function(match, letter) {
+        return letter.toUpperCase();
+    });
+}
+
 function pathToTree(paths:string[], allExport:boolean) {
     const tree = {};
     paths.forEach(path => {
@@ -45,8 +51,9 @@ function pathToTree(paths:string[], allExport:boolean) {
             if (!node[part]) {
                 const isFile = (key+1) === parts.length
                 const fileName = isFile ? part.replace(/\..*/,'') : part
-                const name = `${path.replace(/\..*/, "").split("/").join("_")}_import`
-                node[fileName] = isFile ? (allExport ? `getApi(${name})` : name) : {};
+                const nameOrigin = toCamelCase(path.replace(/\..*/, "").split("/").join("_"))
+                const name = `${nameOrigin}_import`
+                node[toCamelCase(fileName)] = isFile ? (allExport ? `getApi(${name})` : name) : {};
             }
             node = node[part];
         });
@@ -61,7 +68,7 @@ function transformFile(config:AutoApi, apiDirPath:string, mainFilePath:string, r
     const treeData = pathToTree(files.map(e=>e.replace(new RegExp(apiDirPath+'\/*'),'')), config.allExport)
     const importData = files.map(e=>{
         const path = e.replace(new RegExp(`${apiDirPath}\/*|\\.\\w+$`,'img'), '')
-        const nameOrigin = path.split("/").join("_")
+        const nameOrigin = toCamelCase(path.split("/").join("_"))
         const name = `${nameOrigin}_import`
         const getApiName = `export const ${nameOrigin} = ${config.allExport ? `getApi(${name})` : name}`
         return {
