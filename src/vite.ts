@@ -63,7 +63,9 @@ function pathToTree(paths:string[], allExport:boolean) {
 function transformFile(config:AutoApi, apiDirPath:string, mainFilePath:string, resolveAliasName:string){
     if(!existsSync(apiDirPath)) mkdirSync(apiDirPath)
     const resolvers = config.resolvers
-    const files:string[] = sync(`${resolve(apiDirPath, '**/*.ts').replace(/\\/g,'/')}`)
+    const files:string[] = sync(`${resolve(apiDirPath, '**/*.ts')}`,{
+        absolute:false
+    })
         .filter(e=>!e.includes(mainFilePath) && (Object.prototype.toString.call(config.exclude) === '[object RegExp]' ? !config.exclude.test(e) : true))
     const treeData = pathToTree(files.map(e=>e.replace(new RegExp(apiDirPath+'\/*'),'')), config.allExport)
     const importData = files.map(e=>{
