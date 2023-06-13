@@ -60,16 +60,18 @@ function pathToTree(paths:string[], allExport:boolean) {
     });
     return tree;
 }
+function transformPath(path:string){
+    return path.replace(/\\/g,'/')
+}
+
 function transformFile(config:AutoApi, apiDirPath:string, mainFilePath:string, resolveAliasName:string){
     if(!existsSync(apiDirPath)) mkdirSync(apiDirPath)
     const resolvers = config.resolvers
-    const files:string[] = sync(`${resolve(apiDirPath, '**/*.ts')}`,{
-        absolute:false
-    })
-        .filter(e=>!e.includes(mainFilePath) && (Object.prototype.toString.call(config.exclude) === '[object RegExp]' ? !config.exclude.test(e) : true))
-    const treeData = pathToTree(files.map(e=>e.replace(new RegExp(apiDirPath+'\/*'),'')), config.allExport)
+    const files:string[] = sync(`${transformPath(resolve(apiDirPath, '**/*.ts'))}`)
+        .filter(e=>!e.includes(transformPath(mainFilePath)) && (Object.prototype.toString.call(config.exclude) === '[object RegExp]' ? !config.exclude.test(e) : true))
+    const treeData = pathToTree(files.map(e=>e.replace(new RegExp(transformPath(apiDirPath)+'\/*'),'')), config.allExport)
     const importData = files.map(e=>{
-        const path = e.replace(new RegExp(`${apiDirPath}\/*|\\.\\w+$`,'img'), '')
+        const path = e.replace(new RegExp(`${transformPath(apiDirPath)}\/*|\\.\\w+$`,'img'), '')
         const nameOrigin = toCamelCase(path.split("/").join("_"))
         const name = `${nameOrigin}_import`
         const getApiName = `export const ${nameOrigin} = ${config.allExport ? `getApi(${name})` : name}`

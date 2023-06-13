@@ -17475,16 +17475,17 @@ function pathToTree(paths, allExport) {
   });
   return tree;
 }
+function transformPath(path) {
+  return path.replace(/\\/g, "/");
+}
 function transformFile(config, apiDirPath, mainFilePath, resolveAliasName) {
   if (!(0, import_fs_extra.existsSync)(apiDirPath))
     (0, import_fs_extra.mkdirSync)(apiDirPath);
   const resolvers = config.resolvers;
-  const files = (0, import_fast_glob.sync)(`${(0, import_path.resolve)(apiDirPath, "**/*.ts")}`, {
-    absolute: false
-  }).filter((e) => !e.includes(mainFilePath) && (Object.prototype.toString.call(config.exclude) === "[object RegExp]" ? !config.exclude.test(e) : true));
-  const treeData = pathToTree(files.map((e) => e.replace(new RegExp(apiDirPath + "/*"), "")), config.allExport);
+  const files = (0, import_fast_glob.sync)(`${transformPath((0, import_path.resolve)(apiDirPath, "**/*.ts"))}`).filter((e) => !e.includes(transformPath(mainFilePath)) && (Object.prototype.toString.call(config.exclude) === "[object RegExp]" ? !config.exclude.test(e) : true));
+  const treeData = pathToTree(files.map((e) => e.replace(new RegExp(transformPath(apiDirPath) + "/*"), "")), config.allExport);
   const importData = files.map((e) => {
-    const path = e.replace(new RegExp(`${apiDirPath}/*|\\.\\w+$`, "img"), "");
+    const path = e.replace(new RegExp(`${transformPath(apiDirPath)}/*|\\.\\w+$`, "img"), "");
     const nameOrigin = toCamelCase(path.split("/").join("_"));
     const name = `${nameOrigin}_import`;
     const getApiName = `export const ${nameOrigin} = ${config.allExport ? `getApi(${name})` : name}`;
